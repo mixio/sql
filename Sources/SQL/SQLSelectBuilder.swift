@@ -152,9 +152,12 @@ public final class SQLSelectBuilder<Connection>: SQLQueryFetcher, SQLPredicateBu
     public func join<A, B, C, D>(
         _ local: KeyPath<A, B>,
         to foreign: KeyPath<C, D>,
-        method: Connection.Query.Select.Join.Method = .default
-    ) -> Self where A: SQLTable, B: Encodable, C: SQLTable, D: Encodable {
-        return join(C.self, on: local == foreign, method: method)
+        method: Connection.Query.Select.Join.Method = .default,
+        alias: GenericSQLIdentifier? = nil
+    ) -> Self
+        where A: SQLTable, B: Encodable, C: SQLTable, D: Encodable
+    {
+        return join(C.self, on: local == foreign, method: method, alias: alias)
     }
     
     /// Adds a `JOIN` clause to the select statement.
@@ -174,11 +177,12 @@ public final class SQLSelectBuilder<Connection>: SQLQueryFetcher, SQLPredicateBu
     public func join<Table>(
         _ table: Table.Type,
         on expression: Connection.Query.Select.Join.Expression,
-        method: Connection.Query.Select.Join.Method = .default
+        method: Connection.Query.Select.Join.Method = .default,
+        alias: GenericSQLIdentifier?
     ) -> Self
         where Table: SQLTable
     {
-        select.joins.append(.join(method, .table(Table.self), expression))
+        select.joins.append(.join(method, .table(Table.self), expression, alias: alias))
         return self
     }
     

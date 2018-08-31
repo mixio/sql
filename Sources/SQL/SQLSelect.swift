@@ -103,7 +103,7 @@ where Distinct: SQLDistinct,
     }
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("SELECT")
         if let distinct = self.distinct {

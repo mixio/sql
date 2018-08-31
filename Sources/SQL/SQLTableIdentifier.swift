@@ -1,5 +1,5 @@
 /// Identifies a table in a SQL database.
-public protocol SQLTableIdentifier: SQLSerializable {
+public protocol SQLTableIdentifier: SQLSerializable, Hashable {
     /// See `SQLIdentifier`.
     associatedtype Identifier: SQLIdentifier
     
@@ -8,8 +8,22 @@ public protocol SQLTableIdentifier: SQLSerializable {
     
     /// Table identifier.
     var identifier: Identifier { get set }
+
 }
 
+// MARK: Hashable, Equatable
+
+extension SQLTableIdentifier {
+    /// See `Hashable`.
+    public var hashValue: Int {
+        return identifier.string.hashValue
+    }
+
+    /// See `Equatable`.
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.identifier.string == rhs.identifier.string
+    }
+}
 // MARK: Convenience
 
 extension SQLTableIdentifier {
@@ -35,6 +49,7 @@ extension SQLTableIdentifier {
     public static func keyPath<T,V>(_ keyPath: KeyPath<T, V>) -> Self where T: SQLTable {
         return .table(.identifier(T.sqlTableIdentifierString))
     }
+
 }
 
 // MARK: Generic
@@ -43,6 +58,11 @@ extension SQLTableIdentifier {
 public struct GenericSQLTableIdentifier<Identifier>: SQLTableIdentifier, ExpressibleByStringLiteral
     where Identifier: SQLIdentifier
 {
+    /// See `Equatable`.
+    public static func == (lhs: GenericSQLTableIdentifier<Identifier>, rhs: GenericSQLTableIdentifier<Identifier>) -> Bool {
+        return lhs.identifier.string == rhs.identifier.string
+    }
+
     /// See `SQLTableIdentifier`.
     public static func table(_ identifier: Identifier) -> GenericSQLTableIdentifier<Identifier> {
         return .init(identifier)
@@ -62,7 +82,7 @@ public struct GenericSQLTableIdentifier<Identifier>: SQLTableIdentifier, Express
     }
 
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         return identifier.serialize(&binds)
     }
 }

@@ -4,7 +4,7 @@
 public protocol SQLQuery: SQLSerializable {
     /// See `SQLAlterTable`.
     associatedtype AlterTable: SQLAlterTable
-    
+
     /// See `SQLCreateIndex`.
     associatedtype CreateIndex: SQLCreateIndex
     

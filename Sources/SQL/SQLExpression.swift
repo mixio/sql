@@ -1,3 +1,5 @@
+import JJTools
+
 /// A SQL expression, i.e., a column name, value placeholder, function,
 /// subquery, or binary expression.
 ///
@@ -16,7 +18,7 @@ public protocol SQLExpression: SQLSerializable, ExpressibleByFloatLiteral, Expre
     
     /// See `SQLColumnIdentifier`.
     associatedtype ColumnIdentifier: SQLColumnIdentifier
-    
+
     /// See `SQLBinaryOperator`.
     associatedtype BinaryOperator: SQLBinaryOperator
     
@@ -112,6 +114,7 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
     Function: SQLFunction,
     Subquery: SQLSerializable
 {
+
     /// Convenience alias for self.
     public typealias `Self` = GenericSQLExpression<Literal, Bind, ColumnIdentifier, BinaryOperator, Function, Subquery>
 
@@ -189,12 +192,61 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
         }
     }
     
+//    /// See `SQLSerializable`.
+//    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String
+//        switch self {
+//        case ._literal(let literal): return literal.serialize(&binds)
+//        case ._bind(let bind): return bind.serialize(&binds)
+//        case ._column(let column): return column.serialize(&binds)
+//        case ._binary(let lhs, let op, let rhs):
+//            switch rhs {
+//            case ._group(let group):
+//                switch group.count {
+//                case 0:
+//                    switch op {
+//                    case .in: return Self.literal(.boolean(.false)).serialize(&binds)
+//                    case .notIn: return Self.literal(.boolean(.true)).serialize(&binds)
+//                    default: break
+//                    }
+//                case 1:
+//                    switch op {
+//                    case .in: return Self._binary(lhs, .equal, group[0]).serialize(&binds)
+//                    case .notIn: return Self._binary(lhs, .notEqual, group[0]).serialize(&binds)
+//                    default: break
+//                    }
+//                default: break
+//                }
+//            case ._literal(let literal):
+//                if literal.isNull {
+//                    switch op {
+//                    case .equal:
+//                        return lhs.serialize(&binds) + " IS NULL"
+//                    case .notEqual:
+//                        return lhs.serialize(&binds) + " IS NOT NULL"
+//                    default: break
+//                    }
+//                }
+//            default: break
+//            }
+//            return lhs.serialize(&binds) + " " + op.serialize(&binds) + " " + rhs.serialize(&binds)
+//        case ._function(let function): return function.serialize(&binds)
+//        case ._group(let group):
+//            return "(" + group.map { $0.serialize(&binds) }.joined(separator: ", ") + ")"
+//        case ._subquery(let subquery):
+//            return "(" + subquery.serialize(&binds) + ")"
+//        }
+//    }
+
+
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
+        if aliases != nil {
+            jjprint(aliases!)
+        }
         switch self {
         case ._literal(let literal): return literal.serialize(&binds)
         case ._bind(let bind): return bind.serialize(&binds)
-        case ._column(let column): return column.serialize(&binds)
+        case ._column(let column): return column.serialize(&binds, aliases: aliases)
         case ._binary(let lhs, let op, let rhs):
             switch rhs {
             case ._group(let group):
@@ -217,18 +269,18 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
                 if literal.isNull {
                     switch op {
                     case .equal:
-                        return lhs.serialize(&binds) + " IS NULL"
+                        return lhs.serialize(&binds, aliases: aliases) + " IS NULL"
                     case .notEqual:
-                        return lhs.serialize(&binds) + " IS NOT NULL"
+                        return lhs.serialize(&binds, aliases: aliases) + " IS NOT NULL"
                     default: break
                     }
                 }
             default: break
             }
-            return lhs.serialize(&binds) + " " + op.serialize(&binds) + " " + rhs.serialize(&binds)
+            return lhs.serialize(&binds, aliases: aliases) + " " + op.serialize(&binds) + " " + rhs.serialize(&binds, aliases: aliases)
         case ._function(let function): return function.serialize(&binds)
         case ._group(let group):
-            return "(" + group.map { $0.serialize(&binds) }.joined(separator: ", ") + ")"
+            return "(" + group.map { $0.serialize(&binds, aliases: aliases) }.joined(separator: ", ") + ")"
         case ._subquery(let subquery):
             return "(" + subquery.serialize(&binds) + ")"
         }

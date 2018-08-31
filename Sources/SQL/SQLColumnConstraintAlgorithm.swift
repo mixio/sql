@@ -100,7 +100,7 @@ public enum GenericSQLColumnConstraintAlgorithm<Expression, Collation, PrimaryKe
     case _foreignKey(ForeignKey)
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch self {
         case ._primaryKey(let `default`):
             if let d = `default` {

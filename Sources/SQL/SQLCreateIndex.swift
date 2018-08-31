@@ -43,7 +43,7 @@ public struct GenericSQLCreateIndex<Modifier, Identifier, ColumnIdentifier>: SQL
     public var columns: [ColumnIdentifier]
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("CREATE")
         if let modifier = modifier {

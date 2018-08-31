@@ -78,7 +78,7 @@ public enum GenericSQLTableConstraintAlgorithm<Identifier, Expression, Collation
     case _foreignKey([Identifier], ForeignKey)
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch self {
         case ._primaryKey(let columns):
             var sql: [String] = []

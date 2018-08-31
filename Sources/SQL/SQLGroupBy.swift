@@ -20,7 +20,7 @@ public struct GenericSQLGroupBy<Expression>: SQLGroupBy where Expression: SQLExp
     public var expression: Expression
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         return expression.serialize(&binds)
     }
 }

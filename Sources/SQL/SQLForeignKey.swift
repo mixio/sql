@@ -50,7 +50,7 @@ public struct GenericSQLForeignKey<TableIdentifier, Identifier, Action>: SQLFore
     public var onUpdate: Action?
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append(foreignTable.serialize(&binds))
         sql.append("(" + foreignColumns.serialize(&binds) + ")")

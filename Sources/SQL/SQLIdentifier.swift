@@ -1,5 +1,5 @@
 /// An escaped identifier, i.e., `"name"`.
-public protocol SQLIdentifier: SQLSerializable, ExpressibleByStringLiteral {
+public protocol SQLIdentifier: SQLSerializable, ExpressibleByStringLiteral, Hashable {
     /// Creates a new `SQLIdentifier`.
     static func identifier(_ string: String) -> Self
     
@@ -31,6 +31,16 @@ extension SQLIdentifier {
 
 /// Generic implementation of `SQLIdentifier`.
 public struct GenericSQLIdentifier: SQLIdentifier {
+    /// See `Equatable`.
+    public static func == (lhs: GenericSQLIdentifier, rhs: GenericSQLIdentifier) -> Bool {
+        return lhs.string == rhs.string
+    }
+
+    /// See `Hashable`.
+    public var hashValue: Int {
+        return string.hashValue
+    }
+
     /// See `SQLIdentifier`.
     public static func identifier(_ string: String) -> GenericSQLIdentifier {
         return self.init(string)
@@ -50,7 +60,7 @@ public struct GenericSQLIdentifier: SQLIdentifier {
     }
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         return "\"" + string + "\""
     }
 }

@@ -43,7 +43,7 @@ public struct GenericSQLUpdate<TableIdentifier, Identifier, Expression>: SQLUpda
     public var predicate: Expression?
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("UPDATE")
         sql.append(table.serialize(&binds))

@@ -48,7 +48,7 @@ public struct GenericSQLInsert<TableIdentifier, ColumnIdentifier, Expression>: S
     public var values: [[Expression]]
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("INSERT INTO")
         sql.append(table.serialize(&binds))

@@ -1,3 +1,5 @@
+import JJTools
+
 /// Identifies a column in a particular table.
 public protocol SQLColumnIdentifier: SQLSerializable {
     /// See `SQLTableIdentifier`.
@@ -66,12 +68,23 @@ public struct GenericSQLColumnIdentifier<TableIdentifier, Identifier>: SQLColumn
     
     /// See `SQLColumnIdentifier`.
     public var identifier: Identifier
-    
+
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch table {
-        case .some(let table): return table.serialize(&binds) + "." + identifier.serialize(&binds)
-        case .none: return identifier.serialize(&binds)
+        case .some(let table):
+            let tableName: String
+            if let aliases = aliases, let alias = aliases[table] {
+                jjprint(aliases)
+                jjprint(table)
+                tableName = alias.serialize(&binds)
+                jjprint(tableName)
+            } else {
+                tableName = table.serialize(&binds)
+            }
+            return tableName + "." + identifier.serialize(&binds)
+        case .none:
+            return identifier.serialize(&binds)
         }
     }
 }
