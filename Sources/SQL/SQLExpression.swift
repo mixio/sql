@@ -1,3 +1,5 @@
+import JJTools
+
 /// A SQL expression, i.e., a column name, value placeholder, function,
 /// subquery, or binary expression.
 ///
@@ -10,47 +12,47 @@
 public protocol SQLExpression: SQLSerializable, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
     /// See `SQLLiteral`.
     associatedtype Literal: SQLLiteral
-    
+
     /// See `SQLBind`.
     associatedtype Bind: SQLBind
-    
+
     /// See `SQLColumnIdentifier`.
     associatedtype ColumnIdentifier: SQLColumnIdentifier
-    
+
     /// See `SQLBinaryOperator`.
     associatedtype BinaryOperator: SQLBinaryOperator
-    
+
     /// See `SQLFunction`.
     associatedtype Function: SQLFunction
-    
+
     /// See `SQLSerializable`.
     /// Ideally this would be constraint to `SQLQuery`, but that creates a cyclic reference.
     associatedtype Subquery: SQLSerializable
-    
+
     /// Literal strings, integers, and constants.
     static func literal(_ literal: Literal) -> Self
-    
+
     /// Bound value.
     static func bind(_ bind: Bind) -> Self
-    
+
     /// Column name.
     static func column(_ column: ColumnIdentifier) -> Self
-    
+
     /// Binary expression.
     static func binary(_ lhs: Self, _ op: BinaryOperator, _ rhs: Self) -> Self
-    
+
     /// Function.
     static func function(_ function: Function) -> Self
-    
+
     /// Group of expressions.
     static func group(_ expressions: [Self]) -> Self
-    
+
     /// `(SELECT ...)`
     static func subquery(_ subquery: Subquery) -> Self
-    
+
     // FIXME: collate
     // FIXME: cast
-    
+
     /// If `true`, this expression equals `NULL`.
     var isNull: Bool { get }
 }
@@ -65,7 +67,7 @@ extension SQLExpression {
     public static func function(_ name: String, _ args: [Function.Argument] = []) -> Self {
         return .function(.function(name, args))
     }
-    
+
     /// Convenience for creating a `SUM(foo)` function call on a given KeyPath.
     ///
     ///     .sum(\Planet.mass)
@@ -75,7 +77,7 @@ extension SQLExpression {
     {
         return .function("SUM", [.expression(.column(keyPath))])
     }
-    
+
     /// Convenience for creating a `COUNT(foo)` function call on a given KeyPath.
     ///
     ///     .count(\Planet.id)
@@ -85,7 +87,7 @@ extension SQLExpression {
     {
         return .function("COUNT", [.expression(.column(keyPath))])
     }
-    
+
     /// Convenience for creating a Column expression from a KeyPath.
     ///
     ///     .column(\Planet.name)
@@ -103,14 +105,14 @@ extension SQLExpression {
     public static func group(_ exprs: Self...) -> Self {
         return group(exprs)
     }
-    
+
     /// Bound value. Shorthand for `.bind(.encodable(...))`.
     public static func value<E>(_ value: E) -> Self
         where E: Encodable
     {
         return bind(.encodable(value))
     }
-    
+
     /// Bound value. Shorthand for `.bind(.encodable(...))`.
     public static func values<E>(_ values: [E]) -> Self
         where E: Encodable
@@ -172,7 +174,7 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
     public static func literal(_ literal: Literal) -> Self {
         return ._literal(literal)
     }
-    
+
     /// See `SQLExpression`.
     public static func bind(_ bind: Bind) -> Self {
         return ._bind(bind)
@@ -205,30 +207,30 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
 
     /// See `SQLExpression`.
     case _literal(Literal)
-    
+
     /// See `SQLExpression`.
     case _bind(Bind)
-    
+
     /// See `SQLExpression`.
     case _column(ColumnIdentifier)
-    
+
     /// See `SQLExpression`.
     case _binary(`Self`, BinaryOperator, `Self`)
-    
+
     /// See `SQLExpression`.
     case _function(Function)
-    
+
     /// See `SQLExpression`.
     case _group([`Self`])
-    
+
     /// See `SQLExpression`.
     case _subquery(Subquery)
-    
+
     /// See `ExpressibleByFloatLiteral`.
     public init(floatLiteral value: Double) {
         self = ._literal(.numeric(value.description))
     }
-    
+
     /// See `ExpressibleByIntegerLiteral`.
     public init(integerLiteral value: Int) {
         self = ._literal(.numeric(value.description))
@@ -241,13 +243,16 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
         default: return false
         }
     }
-    
+
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
+        if aliases != nil {
+            jjprint(aliases!)
+        }
         switch self {
         case ._literal(let literal): return literal.serialize(&binds)
         case ._bind(let bind): return bind.serialize(&binds)
-        case ._column(let column): return column.serialize(&binds)
+        case ._column(let column): return column.serialize(&binds, aliases: aliases)
         case ._binary(let lhs, let op, let rhs):
             switch rhs {
             case ._group(let group):
@@ -270,18 +275,18 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
                 if literal.isNull {
                     switch op {
                     case .equal:
-                        return lhs.serialize(&binds) + " IS NULL"
+                        return lhs.serialize(&binds, aliases: aliases) + " IS NULL"
                     case .notEqual:
-                        return lhs.serialize(&binds) + " IS NOT NULL"
+                        return lhs.serialize(&binds, aliases: aliases) + " IS NOT NULL"
                     default: break
                     }
                 }
             default: break
             }
-            return lhs.serialize(&binds) + " " + op.serialize(&binds) + " " + rhs.serialize(&binds)
+            return lhs.serialize(&binds, aliases: aliases) + " " + op.serialize(&binds) + " " + rhs.serialize(&binds, aliases: aliases)
         case ._function(let function): return function.serialize(&binds)
         case ._group(let group):
-            return "(" + group.map { $0.serialize(&binds) }.joined(separator: ", ") + ")"
+            return "(" + group.map { $0.serialize(&binds, aliases: aliases) }.joined(separator: ", ") + ")"
         case ._subquery(let subquery):
             return "(" + subquery.serialize(&binds) + ")"
         }
