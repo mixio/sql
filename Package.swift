@@ -10,7 +10,7 @@ let package = Package(
     dependencies: [
         // 🗄 Core services for creating database integrations.
         .package(url: "https://github.com/vapor/database-kit.git", from: "1.2.0"),
-//      .package(url: "https://github.com/mixio/database-kit.git", .branch("mixio-dev")),
+//      .package(url: "https://github.com/mixio/database-kit.git", .branch("mixio-dev-v0.0.1")),
     ],
     targets: [
         .target(name: "SQL", dependencies: ["DatabaseKit"]),
