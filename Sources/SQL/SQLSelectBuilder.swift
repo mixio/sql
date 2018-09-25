@@ -11,27 +11,27 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
 {
     /// `Select` query being built.
     public var select: Connectable.Connection.Query.Select
-    
+
     /// See `SQLQueryBuilder`.
     public var connectable: Connectable
-    
+
     /// See `SQLQueryBuilder`.
     public var query: Connectable.Connection.Query {
         return .select(select)
     }
-    
+
     /// See `SQLWhereBuilder`.
     public var predicate: Connectable.Connection.Query.Select.Expression? {
         get { return select.predicate }
         set { select.predicate = newValue }
     }
-    
+
     /// Creates a new `SQLCreateTableBuilder`.
     public init(_ select: Connectable.Connection.Query.Select, on connectable: Connectable) {
         self.select = select
         self.connectable = connectable
     }
-    
+
     /// Adds a column to be returned in the result set.
     ///
     ///     conn.select().column("name")
@@ -49,7 +49,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
         table: Connectable.Connection.Query.Select.SelectExpression.Expression.ColumnIdentifier.TableIdentifier? = nil) -> Self {
         return column(.column(.column(table, name)))
     }
-    
+
     /// Adds a column to be returned in the result set.
     ///
     ///     conn.select().column(\User.name)
@@ -62,7 +62,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     {
         return column(.column(.keyPath(keyPath)))
     }
-    
+
     /// Adds an expression column to the result set.
     ///
     ///     conn.select()
@@ -79,7 +79,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     ) -> Self {
         return column(.expression(expression, alias: alias))
     }
-    
+
     /// All columns, i.e., `*`.
     ///
     ///     conn.select()
@@ -91,7 +91,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     public func all() -> Self {
         return column(.all)
     }
-    
+
     /// All columns from a specified table, i.e., `table.*`.
     ///
     ///     conn.select()
@@ -107,13 +107,13 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     {
         return column(.allTable(.table(T.self)))
     }
-    
+
     /// Adds a `SQLSelectExpression` to the result set.
     public func column(_ column: Connectable.Connection.Query.Select.SelectExpression) -> Self {
         select.columns.append(column)
         return self
     }
-    
+
     /// Adds a table to the `FROM` clause.
     ///
     ///     conn.select()
@@ -130,7 +130,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
         select.tables.append(.table(.identifier(Table.sqlTableIdentifierString)))
         return self
     }
-    
+
     /// Adds one or more tables to the `FROM` clause.
     ///
     ///     conn.select()
@@ -145,7 +145,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
         select.tables += tables
         return self
     }
-    
+
     /// Adds a `JOIN` clause to the select statement.
     ///
     ///     conn.select()
@@ -163,11 +163,14 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     public func join<A, B, C, D>(
         _ local: KeyPath<A, B>,
         to foreign: KeyPath<C, D>,
-        method: Connectable.Connection.Query.Select.Join.Method = .default
-    ) -> Self where A: SQLTable, B: Encodable, C: SQLTable, D: Encodable {
-        return join(C.self, on: local == foreign, method: method)
+        method: Connectable.Connection.Query.Select.Join.Method = .default,
+        alias: GenericSQLIdentifier? = nil
+    ) -> Self
+        where A: SQLTable, B: Encodable, C: SQLTable, D: Encodable
+    {
+        return join(C.self, on: local == foreign, method: method, alias: alias)
     }
-    
+
     /// Adds a `JOIN` clause to the select statement.
     ///
     ///     conn.select()
@@ -189,10 +192,10 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     ) -> Self
         where Table: SQLTable
     {
-        select.joins.append(.join(method, .table(Table.self), expression))
+        select.joins.append(.join(method, .table(Table.self), expression, alias: alias))
         return self
     }
-    
+
     /// Adds a `GROUP BY` clause to the select statement.
     ///
     ///     conn.select()
@@ -207,7 +210,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     {
         return groupBy(.column(.keyPath(keyPath)))
     }
-    
+
     /// Adds a `GROUP BY` clause to the select statement.
     ///
     /// - parameters:
@@ -217,7 +220,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
         select.groupBy.append(.groupBy(expression))
         return self
     }
-    
+
     /// Adds a `LIMIT` clause to the select statement.
     ///
     ///     builder.limit(5)
@@ -230,7 +233,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
         self.select.limit = max
         return self
     }
-    
+
     /// Adds a `OFFSET` clause to the select statement.
     ///
     ///     builder.offset(5)
@@ -243,7 +246,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
         self.select.offset = n
         return self
     }
-    
+
     /// Adds an `ORDER BY` clause to the select statement.
     ///
     ///     conn.select()
@@ -263,7 +266,7 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     {
         return orderBy(.column(.keyPath(keyPath)), direction)
     }
-    
+
     /// Adds an `ORDER BY` clause to the select statement.
     ///
     /// - parameters:
