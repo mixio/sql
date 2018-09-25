@@ -1,17 +1,19 @@
+import JJTools
+
 /// Identifies a column in a particular table.
 public protocol SQLColumnIdentifier: SQLSerializable {
     /// See `SQLTableIdentifier`.
     associatedtype TableIdentifier: SQLTableIdentifier
-    
+
     /// See `SQLIdentifier`.
     associatedtype Identifier: SQLIdentifier
-    
+
     /// Creates a new `SQLColumnIdentifier`.
     static func column(_ table: TableIdentifier?, _ identifier: Identifier) -> Self
-    
+
     /// Optional identifier for the table this column belongs to.
     var table: TableIdentifier? { get set }
-    
+
     /// Column identifier.
     var identifier: Identifier { get set }
 }
@@ -46,12 +48,12 @@ public struct GenericSQLColumnIdentifier<TableIdentifier, Identifier>: SQLColumn
     public static func column(_ table: TableIdentifier?, _ identifier: Identifier) -> GenericSQLColumnIdentifier<TableIdentifier, Identifier> {
         return self.init(table: table, identifier: identifier)
     }
-    
+
     /// See `Equatable`.
     public static func == (lhs: GenericSQLColumnIdentifier<TableIdentifier, Identifier>, rhs: GenericSQLColumnIdentifier<TableIdentifier, Identifier>) -> Bool {
         return lhs.table?.identifier.string == rhs.table?.identifier.string && lhs.identifier.string == rhs.identifier.string
     }
-    
+
     /// See `Hashable`.
     public var hashValue: Int {
         if let table = table {
@@ -60,18 +62,29 @@ public struct GenericSQLColumnIdentifier<TableIdentifier, Identifier>: SQLColumn
             return identifier.string.hashValue
         }
     }
-    
+
     /// See `SQLColumnIdentifier`.
     public var table: TableIdentifier?
-    
+
     /// See `SQLColumnIdentifier`.
     public var identifier: Identifier
-    
+
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch table {
-        case .some(let table): return table.serialize(&binds) + "." + identifier.serialize(&binds)
-        case .none: return identifier.serialize(&binds)
+        case .some(let table):
+            let tableName: String
+            if let aliases = aliases, let alias = aliases[table] {
+                jjprint(aliases)
+                jjprint(table)
+                tableName = alias.serialize(&binds)
+                jjprint(tableName)
+            } else {
+                tableName = table.serialize(&binds)
+            }
+            return tableName + "." + identifier.serialize(&binds)
+        case .none:
+            return identifier.serialize(&binds)
         }
     }
 }
