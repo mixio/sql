@@ -50,17 +50,17 @@ public struct GenericSQLForeignKey<TableIdentifier, Identifier, Action>: SQLFore
     public var onUpdate: Action?
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
-        sql.append(foreignTable.serialize(&binds))
-        sql.append("(" + foreignColumns.serialize(&binds) + ")")
+        sql.append(foreignTable.serialize(&binds, aliases: aliases))
+        sql.append("(" + foreignColumns.serialize(&binds, aliases: aliases) + ")")
         if let onDelete = onDelete {
             sql.append("ON DELETE")
-            sql.append(onDelete.serialize(&binds))
+            sql.append(onDelete.serialize(&binds, aliases: aliases))
         }
         if let onUpdate = onUpdate {
             sql.append("ON UPDATE")
-            sql.append(onUpdate.serialize(&binds))
+            sql.append(onUpdate.serialize(&binds, aliases: aliases))
         }
         return sql.joined(separator: " ")
     }

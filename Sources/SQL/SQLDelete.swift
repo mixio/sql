@@ -38,13 +38,13 @@ public struct GenericSQLDelete<TableIdentifier, Expression>: SQLDelete
     public var predicate: Expression?
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("DELETE FROM")
-        sql.append(table.serialize(&binds))
+        sql.append(table.serialize(&binds, aliases: aliases))
         if let predicate = self.predicate {
             sql.append("WHERE")
-            sql.append(predicate.serialize(&binds))
+            sql.append(predicate.serialize(&binds, aliases: aliases))
         }
         return sql.joined(separator: " ")
     }

@@ -23,7 +23,7 @@ public struct GenericSQLFunction<Argument>: SQLFunction where Argument: SQLFunct
     public var arguments: [Argument]
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
-        return name + "(" + arguments.map { $0.serialize(&binds) }.joined(separator: ", ") + ")"
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
+        return name + "(" + arguments.map { $0.serialize(&binds, aliases: aliases) }.joined(separator: ", ") + ")"
     }
 }

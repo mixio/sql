@@ -62,7 +62,7 @@ public struct GenericSQLCreateTable<TableIdentifier, ColumnDefinition, TableCons
     public var tableConstraints: [TableConstraint]
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("CREATE")
         if temporary {
@@ -72,8 +72,8 @@ public struct GenericSQLCreateTable<TableIdentifier, ColumnDefinition, TableCons
         if ifNotExists {
             sql.append("IF NOT EXISTS")
         }
-        sql.append(table.serialize(&binds))
-        let actions = columns.map { $0.serialize(&binds) } + tableConstraints.map { $0.serialize(&binds) }
+        sql.append(table.serialize(&binds, aliases: aliases))
+        let actions = columns.map { $0.serialize(&binds, aliases: aliases) } + tableConstraints.map { $0.serialize(&binds, aliases: aliases) }
         sql.append("(" + actions.joined(separator: ", ") + ")")
         return sql.joined(separator: " ")
     }

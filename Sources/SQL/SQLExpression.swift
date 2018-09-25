@@ -250,8 +250,8 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
             jjprint(aliases!)
         }
         switch self {
-        case ._literal(let literal): return literal.serialize(&binds)
-        case ._bind(let bind): return bind.serialize(&binds)
+        case ._literal(let literal): return literal.serialize(&binds, aliases: aliases)
+        case ._bind(let bind): return bind.serialize(&binds, aliases: aliases)
         case ._column(let column): return column.serialize(&binds, aliases: aliases)
         case ._binary(let lhs, let op, let rhs):
             switch rhs {
@@ -259,14 +259,14 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
                 switch group.count {
                 case 0:
                     switch op {
-                    case .in: return Self.literal(.boolean(.false)).serialize(&binds)
-                    case .notIn: return Self.literal(.boolean(.true)).serialize(&binds)
+                    case .in: return Self.literal(.boolean(.false)).serialize(&binds, aliases: aliases)
+                    case .notIn: return Self.literal(.boolean(.true)).serialize(&binds, aliases: aliases)
                     default: break
                     }
                 case 1:
                     switch op {
-                    case .in: return Self._binary(lhs, .equal, group[0]).serialize(&binds)
-                    case .notIn: return Self._binary(lhs, .notEqual, group[0]).serialize(&binds)
+                    case .in: return Self._binary(lhs, .equal, group[0]).serialize(&binds, aliases: aliases)
+                    case .notIn: return Self._binary(lhs, .notEqual, group[0]).serialize(&binds, aliases: aliases)
                     default: break
                     }
                 default: break
@@ -283,12 +283,12 @@ public indirect enum GenericSQLExpression<Literal, Bind, ColumnIdentifier, Binar
                 }
             default: break
             }
-            return lhs.serialize(&binds, aliases: aliases) + " " + op.serialize(&binds) + " " + rhs.serialize(&binds, aliases: aliases)
-        case ._function(let function): return function.serialize(&binds)
+            return lhs.serialize(&binds, aliases: aliases) + " " + op.serialize(&binds, aliases: aliases) + " " + rhs.serialize(&binds, aliases: aliases)
+        case ._function(let function): return function.serialize(&binds, aliases: aliases)
         case ._group(let group):
             return "(" + group.map { $0.serialize(&binds, aliases: aliases) }.joined(separator: ", ") + ")"
         case ._subquery(let subquery):
-            return "(" + subquery.serialize(&binds) + ")"
+            return "(" + subquery.serialize(&binds, aliases: aliases) + ")"
         }
     }
 }

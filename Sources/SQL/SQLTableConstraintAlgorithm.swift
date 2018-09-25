@@ -78,27 +78,27 @@ public enum GenericSQLTableConstraintAlgorithm<Identifier, Expression, Collation
     case _foreignKey([Identifier], ForeignKey)
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch self {
         case ._primaryKey(let columns):
             var sql: [String] = []
             sql.append("PRIMARY KEY")
-            sql.append("(" + columns.serialize(&binds) + ")")
+            sql.append("(" + columns.serialize(&binds, aliases: aliases) + ")")
             return sql.joined(separator: " ")
         case ._notNull: return "NOT NULL"
         case ._unique(let columns):
             var sql: [String] = []
             sql.append("UNIQUE")
-            sql.append("(" + columns.serialize(&binds) + ")")
+            sql.append("(" + columns.serialize(&binds, aliases: aliases) + ")")
             return sql.joined(separator: " ")
         case ._check(let expression):
-            return "CHECK (" + expression.serialize(&binds) + ")"
+            return "CHECK (" + expression.serialize(&binds, aliases: aliases) + ")"
         case ._foreignKey(let columns, let foreignKey):
             var sql: [String] = []
             sql.append("FOREIGN KEY")
-            sql.append("(" + columns.serialize(&binds) + ")")
+            sql.append("(" + columns.serialize(&binds, aliases: aliases) + ")")
             sql.append("REFERENCES")
-            sql.append(foreignKey.serialize(&binds))
+            sql.append(foreignKey.serialize(&binds, aliases: aliases))
             return sql.joined(separator: " ")
         }
     }

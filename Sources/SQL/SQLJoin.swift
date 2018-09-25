@@ -39,19 +39,19 @@ public struct GenericSQLJoin<Method, TableIdentifier, Expression>: SQLJoin
     /// See `SQLSerializable`.
     public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql = [String]()
-        sql.append(method.serialize(&binds))
+        sql.append(method.serialize(&binds, aliases: aliases))
         sql.append("JOIN")
-        sql.append(table.serialize(&binds))
+        sql.append(table.serialize(&binds, aliases: aliases))
         if let alias = alias {
             sql.append("AS")
-            sql.append(alias.serialize(&binds))
+            sql.append(alias.serialize(&binds, aliases: aliases))
             sql.append("ON")
             let tableAliases = SQLTableAliases(table:table, alias:alias)
             jjprint(tableAliases)
             sql.append(expression.serialize(&binds, aliases: tableAliases))
        } else {
             sql.append("ON")
-            sql.append(expression.serialize(&binds))
+            sql.append(expression.serialize(&binds, aliases: aliases))
         }
         return  sql.joined(separator: " ")
     }

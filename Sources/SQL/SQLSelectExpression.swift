@@ -122,14 +122,14 @@ public enum GenericSQLSelectExpression<Expression, Identifier, TableIdentifier>:
     case _expression(Expression, alias: Identifier?)
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch self {
         case ._all: return "*"
-        case ._allTable(let table): return table.serialize(&binds) + ".*"
+        case ._allTable(let table): return table.serialize(&binds, aliases: aliases) + ".*"
         case ._expression(let expr, let alias):
             switch alias {
-            case .none: return expr.serialize(&binds)
-            case .some(let alias): return expr.serialize(&binds) + " AS " + alias.serialize(&binds)
+            case .none: return expr.serialize(&binds, aliases: aliases)
+            case .some(let alias): return expr.serialize(&binds, aliases: aliases) + " AS " + alias.serialize(&binds, aliases: aliases)
             }
         }
     }

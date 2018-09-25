@@ -184,11 +184,13 @@ public final class SQLSelectBuilder<Connectable>: SQLQueryFetcher, SQLPredicateB
     ///     - table: Foreign `SQLTable` to join.
     ///     - expression: `SQLExpression` to use for joining the tables.
     ///     - method: `SQLJoinMethod` to use.
+    ///     - alias: `GenericSQLIdentifier` to use as table alias in expression.
     /// - returns: Self for chaining.
     public func join<Table>(
         _ table: Table.Type,
         on expression: Connectable.Connection.Query.Select.Join.Expression,
-        method: Connectable.Connection.Query.Select.Join.Method = .default
+        method: Connectable.Connection.Query.Select.Join.Method = .default,
+        alias: GenericSQLIdentifier?
     ) -> Self
         where Table: SQLTable
     {

@@ -77,14 +77,14 @@ public struct GenericSQLColumnIdentifier<TableIdentifier, Identifier>: SQLColumn
             if let aliases = aliases, let alias = aliases[table] {
                 jjprint(aliases)
                 jjprint(table)
-                tableName = alias.serialize(&binds)
+                tableName = alias.serialize(&binds, aliases: aliases)
                 jjprint(tableName)
             } else {
-                tableName = table.serialize(&binds)
+                tableName = table.serialize(&binds, aliases: aliases)
             }
-            return tableName + "." + identifier.serialize(&binds)
+            return tableName + "." + identifier.serialize(&binds, aliases: aliases)
         case .none:
-            return identifier.serialize(&binds)
+            return identifier.serialize(&binds, aliases: aliases)
         }
     }
 }

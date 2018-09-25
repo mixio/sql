@@ -32,13 +32,13 @@ public struct GenericSQLDropTable<TableIdentifier>: SQLDropTable
     public var ifExists: Bool
 
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("DROP TABLE")
         if ifExists {
             sql.append("IF EXISTS")
         }
-        sql.append(table.serialize(&binds))
+        sql.append(table.serialize(&binds, aliases: aliases))
         return sql.joined(separator: " ")
     }
 }

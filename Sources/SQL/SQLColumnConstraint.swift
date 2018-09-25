@@ -142,11 +142,11 @@ public struct GenericSQLColumnConstraint<Identifier, Algorithm>: SQLColumnConstr
     public var algorithm: Algorithm
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         if let identifier = self.identifier {
-            return "CONSTRAINT " + identifier.serialize(&binds) + " " + algorithm.serialize(&binds)
+            return "CONSTRAINT " + identifier.serialize(&binds, aliases: aliases) + " " + algorithm.serialize(&binds, aliases: aliases)
         } else {
-            return algorithm.serialize(&binds)
+            return algorithm.serialize(&binds, aliases: aliases)
         }
     }
 }

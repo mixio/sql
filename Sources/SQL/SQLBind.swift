@@ -20,7 +20,7 @@ public struct GenericSQLBind: SQLBind {
     public var value: Encodable
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         binds.append(value)
         return "?"
     }

@@ -106,11 +106,11 @@ public enum GenericSQLLiteral<DefaultLiteral, BoolLiteral>: SQLLiteral, Expressi
     }
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch self {
-        case ._boolean(let bool): return bool.serialize(&binds)
+        case ._boolean(let bool): return bool.serialize(&binds, aliases: aliases)
         case ._null: return "NULL"
-        case ._default(let d): return d.serialize(&binds)
+        case ._default(let d): return d.serialize(&binds, aliases: aliases)
         case ._numeric(let string): return string
         case ._string(let string): return "'" + string + "'"
         }

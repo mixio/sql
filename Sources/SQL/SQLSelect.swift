@@ -103,31 +103,31 @@ where Distinct: SQLDistinct,
     }
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("SELECT")
         if let distinct = self.distinct {
-            sql.append(distinct.serialize(&binds))
+            sql.append(distinct.serialize(&binds, aliases: aliases))
         }
-        sql.append(columns.serialize(&binds))
+        sql.append(columns.serialize(&binds, aliases: aliases))
         if !tables.isEmpty {
             sql.append("FROM")
-            sql.append(tables.serialize(&binds))
+            sql.append(tables.serialize(&binds, aliases: aliases))
         }
         if !joins.isEmpty {
             sql.append(joins.serialize(&binds, joinedBy: " "))
         }
         if let predicate = self.predicate {
             sql.append("WHERE")
-            sql.append(predicate.serialize(&binds))
+            sql.append(predicate.serialize(&binds, aliases: aliases))
         }
         if !groupBy.isEmpty {
             sql.append("GROUP BY")
-            sql.append(groupBy.serialize(&binds))
+            sql.append(groupBy.serialize(&binds, aliases: aliases))
         }
         if !orderBy.isEmpty {
             sql.append("ORDER BY")
-            sql.append(orderBy.serialize(&binds))
+            sql.append(orderBy.serialize(&binds, aliases: aliases))
         }
         if let limit = self.limit {
             sql.append("LIMIT")

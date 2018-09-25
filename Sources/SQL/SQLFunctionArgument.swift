@@ -31,10 +31,10 @@ public enum GenericSQLFunctionArgument<Expression>: SQLFunctionArgument where Ex
     case _expression(Expression)
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         switch self {
         case ._all: return "*"
-        case ._expression(let expr): return expr.serialize(&binds)
+        case ._expression(let expr): return expr.serialize(&binds, aliases: aliases)
         }
     }
 }

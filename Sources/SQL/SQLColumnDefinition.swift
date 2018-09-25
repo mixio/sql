@@ -39,10 +39,10 @@ public struct GenericSQLColumnDefinition<ColumnIdentifier, DataType, ColumnConst
     public var constraints: [ColumnConstraint]
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
-        sql.append(column.identifier.serialize(&binds))
-        sql.append(dataType.serialize(&binds))
+        sql.append(column.identifier.serialize(&binds, aliases: aliases))
+        sql.append(dataType.serialize(&binds, aliases: aliases))
         sql.append(constraints.serialize(&binds, joinedBy: " "))
         return sql.joined(separator: " ")
     }

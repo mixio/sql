@@ -26,7 +26,7 @@ public struct GenericSQLOrderBy<Expression, Direction>: SQLOrderBy where Express
     public var direction: Direction
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
-        return expression.serialize(&binds) + " " + direction.serialize(&binds)
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
+        return expression.serialize(&binds, aliases: aliases) + " " + direction.serialize(&binds, aliases: aliases)
     }
 }

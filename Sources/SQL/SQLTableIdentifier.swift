@@ -80,7 +80,7 @@ public struct GenericSQLTableIdentifier<Identifier>: SQLTableIdentifier, Express
     }
 
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
-        return identifier.serialize(&binds)
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
+        return identifier.serialize(&binds, aliases: aliases)
     }
 }

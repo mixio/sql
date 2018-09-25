@@ -48,13 +48,13 @@ public struct GenericSQLInsert<TableIdentifier, ColumnIdentifier, Expression>: S
     public var values: [[Expression]]
     
     /// See `SQLSerializable`.
-    public func serialize(_ binds: inout [Encodable]) -> String {
+    public func serialize(_ binds: inout [Encodable], aliases: SQLTableAliases?) -> String {
         var sql: [String] = []
         sql.append("INSERT INTO")
-        sql.append(table.serialize(&binds))
-        sql.append("(" + columns.serialize(&binds) + ")")
+        sql.append(table.serialize(&binds, aliases: aliases))
+        sql.append("(" + columns.serialize(&binds, aliases: aliases) + ")")
         sql.append("VALUES")
-        sql.append(values.map { "(" + $0.serialize(&binds) + ")"}.joined(separator: ", "))
+        sql.append(values.map { "(" + $0.serialize(&binds, aliases: aliases) + ")"}.joined(separator: ", "))
         return sql.joined(separator: " ")
     }
 }
